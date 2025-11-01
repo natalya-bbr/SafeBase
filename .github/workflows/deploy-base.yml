@@ -1,9 +1,42 @@
-name: ci: add deployment workflow
+name: Deploy to Base
 
-on: [push]
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network'
+        required: true
+        type: choice
+        options:
+          - sepolia
+          - mainnet
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Deploy to Base ${{ inputs.network }}
+        run: |
+          forge script script/DeployAndInteract.s.sol \
+            --rpc-url ${{ inputs.network == 'mainnet' && 'https://mainnet.base.org' || 'https://sepolia.base.org' }} \
+            --broadcast \
+            --verify \
+            -vvvv
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          OWNER_ADDRESS: ${{ secrets.OWNER_ADDRESS }}
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+          REQUIRED_APPROVALS: 2
+
+      - name: Save deployment artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-${{ inputs.network }}
+          path: broadcast/
