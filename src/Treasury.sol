@@ -65,7 +65,6 @@ contract Treasury is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
     function initialize(address _owner, uint256 _requiredApprovals) public initializer {
         __Ownable_init(_owner);
-        __UUPSUpgradeable_init();
         requiredApprovals = _requiredApprovals;
     }
 
@@ -164,6 +163,11 @@ contract Treasury is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         if (request.status == RequestStatus.Executed) revert InvalidStatus();
         request.status = RequestStatus.Cancelled;
         emit WithdrawalCancelled(requestId);
+    }
+
+    function setRequiredApprovals(uint256 _requiredApprovals) external onlyOwner {
+        require(_requiredApprovals > 0, "Invalid approval count");
+        requiredApprovals = _requiredApprovals;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
