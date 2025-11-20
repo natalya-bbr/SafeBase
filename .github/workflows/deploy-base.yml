@@ -36,7 +36,7 @@ jobs:
           REQUIRED_APPROVALS: 2
 
       - name: Save deployment artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deployment-${{ inputs.network }}
           path: broadcast/
