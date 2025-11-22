@@ -52,9 +52,13 @@ contract DeployAndInteractScript is Script {
         vm.stopBroadcast();
 
         console.log("\n=== Deployment Complete ===");
-        console.log("Treasury:", address(treasury));
+        console.log("Treasury Proxy:", address(treasury));
         console.log("Implementation:", address(implementation));
-        console.log("\nVerify with:");
-        console.log("forge verify-contract", address(implementation), "src/Treasury.sol:Treasury --chain-id 84532");
+        console.log("Admin 1:", admin1);
+        console.log("Admin 2:", admin2);
+        console.log("Executor:", executor1);
+        console.log("\nContracts will be verified automatically on Basescan");
+        console.log("If verification fails, run manually:");
+        console.log("  ./verify.sh");
     }
 }
