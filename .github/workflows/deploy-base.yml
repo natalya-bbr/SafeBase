@@ -28,6 +28,8 @@ jobs:
             --rpc-url ${{ inputs.network == 'mainnet' && 'https://mainnet.base.org' || 'https://sepolia.base.org' }} \
             --broadcast \
             --verify \
+            --verifier etherscan \
+            --etherscan-api-key ${{ secrets.BASESCAN_API_KEY }} \
             -vvvv
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
