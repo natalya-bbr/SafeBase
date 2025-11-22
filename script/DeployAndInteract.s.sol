@@ -44,11 +44,6 @@ contract DeployAndInteractScript is Script {
         treasury.addExecutor(executor1);
         console.log("Added executor1:", executor1);
 
-        if (address(treasury).balance == 0) {
-            payable(address(treasury)).transfer(0.001 ether);
-            console.log("Deposited 0.001 ETH to treasury");
-        }
-
         vm.stopBroadcast();
 
         console.log("\n=== Deployment Complete ===");
