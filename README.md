@@ -56,16 +56,7 @@ forge script script/DeployAndInteract.s.sol \
   -vvvv
 ```
 
-## Verify Existing Deployment
-
-If you already deployed but contracts aren't verified on Basescan:
-
-```bash
-export BASESCAN_API_KEY="your_key_here"
-./verify.sh
-```
-
-See [VERIFICATION.md](./VERIFICATION.md) for detailed instructions.
+**Note:** Contracts will be automatically verified on Basescan if `BASESCAN_API_KEY` is set in `.env`
 
 ## Deployed Contracts
 

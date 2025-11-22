@@ -58,7 +58,5 @@ contract DeployAndInteractScript is Script {
         console.log("Admin 2:", admin2);
         console.log("Executor:", executor1);
         console.log("\nContracts will be verified automatically on Basescan");
-        console.log("If verification fails, run manually:");
-        console.log("  ./verify.sh");
     }
 }
