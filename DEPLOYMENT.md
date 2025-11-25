@@ -53,11 +53,12 @@ The project includes a unified deployment workflow that allows selective contrac
   - `Executor` - Deploy only Executor
 
 **Features:**
-- ✅ Automatically skips already deployed contracts
-- ✅ Reads existing addresses from `deployments/*.json`
-- ✅ Automatic Basescan verification
-- ✅ Saves deployment artifacts
-- ✅ Configures contract dependencies automatically
+- ✅ **Smart Deployment** - Automatically reads existing addresses from `deployments/*.json`
+- ✅ **Skip Deployed** - Skips already deployed contracts (saves gas!)
+- ✅ **Idempotent** - Safe to run multiple times without redeploying
+- ✅ **Automatic Basescan Verification** - All contracts verified on deployment
+- ✅ **Saves Artifacts** - Deployment data saved for audit trail
+- ✅ **Auto-Configuration** - Configures contract dependencies automatically
 
 ### Required Secrets
 
@@ -69,14 +70,27 @@ Configure these in GitHub Settings → Secrets and variables → Actions:
 
 ## Local Deployment
 
-### Deploy All Contracts
+### Deploy All Contracts (Smart Mode)
+
+Both `DeployProxy.s.sol` and `DeployModular.s.sol` now support smart deployment:
 
 ```bash
+# Using DeployModular.s.sol (recommended for selective deployment)
 forge script script/DeployModular.s.sol \
   --rpc-url https://mainnet.base.org \
   --broadcast \
-  --verify
+  --verify \
+  --fs-permissions read=deployments/
+
+# Using DeployProxy.s.sol (deploys all contracts)
+forge script script/DeployProxy.s.sol \
+  --rpc-url https://mainnet.base.org \
+  --broadcast \
+  --verify \
+  --fs-permissions read=deployments/
 ```
+
+⚠️ **Important:** Add `--fs-permissions read=deployments/` to allow reading existing addresses from JSON files.
 
 ### Deploy Specific Contract
 
@@ -84,7 +98,23 @@ forge script script/DeployModular.s.sol \
 DEPLOY_CONTRACT=RulesEngine forge script script/DeployModular.s.sol \
   --rpc-url https://mainnet.base.org \
   --broadcast \
-  --verify
+  --verify \
+  --fs-permissions read=deployments/
+```
+
+### How Smart Deployment Works
+
+1. **Read JSON** - Script reads `deployments/8453.json` or `deployments/84532.json` based on chain ID
+2. **Check Existing** - For each contract, checks if proxy address exists and is not `address(0)`
+3. **Skip or Deploy** - If exists, logs "already deployed at X" and skips; otherwise deploys fresh
+4. **Configure** - After all deployments, configures dependencies (setRulesEngine, setRegistry, etc.)
+5. **Safe Retry** - Configuration uses try-catch, so safe to run multiple times
+
+### Console Output Examples
+
+```
+Treasury already deployed at: 0xE965E798Fd2cDeA9e5BCeD37292477Cc802d92f2
+AccessController deployed - Proxy: 0x123... Impl: 0x456...
 ```
 
 ### Environment Variables
