@@ -1,0 +1,43 @@
+{
+  "chainId": 84532,
+  "network": "base-sepolia",
+  "deployedAt": "2025-11-22",
+  "contracts": {
+    "Treasury": {
+      "proxy": "0x546bD44cE5576A6e90cC7150aD93aAD1B06291BE",
+      "implementation": "0xAA1be2099208db011dFbEa7174114D69982cFcef"
+    },
+    "AccessController": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "Verifier": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "PaymentTracker": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "BasePay": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "RulesEngine": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "Registry": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "SafeBaseEscrow": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "Executor": {
+      "proxy": "",
+      "implementation": ""
+    }
+  }
+}

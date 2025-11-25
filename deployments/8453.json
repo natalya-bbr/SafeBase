@@ -1,0 +1,43 @@
+{
+  "chainId": 8453,
+  "network": "base-mainnet",
+  "deployedAt": "2025-11-22",
+  "contracts": {
+    "Treasury": {
+      "proxy": "0xE965E798Fd2cDeA9e5BCeD37292477Cc802d92f2",
+      "implementation": "0x8FeD01EB5FC4Ec7f7719a726efFbD19F081c83fC"
+    },
+    "AccessController": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "Verifier": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "PaymentTracker": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "BasePay": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "RulesEngine": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "Registry": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "SafeBaseEscrow": {
+      "proxy": "",
+      "implementation": ""
+    },
+    "Executor": {
+      "proxy": "",
+      "implementation": ""
+    }
+  }
+}
