@@ -1,0 +1,43 @@
+name: Deploy SafeBase Escrow System
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network'
+        required: true
+        type: choice
+        options:
+          - sepolia
+          - mainnet
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Deploy to Base ${{ inputs.network }}
+        run: |
+          forge script script/DeployProxy.s.sol \
+            --rpc-url ${{ inputs.network == 'mainnet' && 'https://mainnet.base.org' || 'https://sepolia.base.org' }} \
+            --broadcast \
+            --verify \
+            --verifier etherscan \
+            --etherscan-api-key ${{ secrets.BASESCAN_API_KEY }} \
+            -vvvv
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          OWNER_ADDRESS: ${{ secrets.OWNER_ADDRESS }}
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+
+      - name: Save deployment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-escrow-${{ inputs.network }}
+          path: broadcast/
