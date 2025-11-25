@@ -1,43 +1,43 @@
 {
   "chainId": 84532,
   "network": "base-sepolia",
-  "deployedAt": "2025-11-22",
+  "deployedAt": "2025-11-25",
   "contracts": {
     "Treasury": {
       "proxy": "0x546bD44cE5576A6e90cC7150aD93aAD1B06291BE",
       "implementation": "0xAA1be2099208db011dFbEa7174114D69982cFcef"
     },
     "AccessController": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0x273930106653461A2F4f33Ea2821652283dcAE11",
+      "implementation": "0xC1E06BfBBe9b812BFc5feFBe4efDFb7B9A4E64cB"
     },
     "Verifier": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0x1B079e9519CF110b491a231d7AA67c9a597F13B2",
+      "implementation": "0x4b015dF938d053388796078FA3F5145C550C4EE8"
     },
     "PaymentTracker": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94",
+      "implementation": "0xD7fd8D4026123B1c4135cbF6ba91b7A0b3a5C748"
     },
     "BasePay": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0x062d3a45862a32BF5D1e35404aaA55e7027c4F4B",
+      "implementation": "0xCB66CBF0A09c3Bf336f1290DFB6e6CfB213132Ff"
     },
     "RulesEngine": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xDb1855c6C8ADd51eE4B7e132173cA9833B1DAf07",
+      "implementation": "0xf3377563303A664141c98643f98a9918456f2216"
     },
     "Registry": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0x57741EE5bAc991D43Cf71207781fCB0eE4b9e9a8",
+      "implementation": "0x509014Ac3d57ee08B2A47639aCDeEaE1B700960f"
     },
     "SafeBaseEscrow": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xA1e13a0E7E54bC71ee4173D74773b455A86816aB",
+      "implementation": "0x9b0C3872234e403aa62F7315122019c22D9e4F11"
     },
     "Executor": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xB49e7b4cCB76B3aE9439798eb980434CBCF8c428",
+      "implementation": "0x6112146dea7A81D2F3F189084608a99BCAA2F388"
     }
   }
 }
