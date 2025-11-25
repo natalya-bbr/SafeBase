@@ -1,43 +1,43 @@
 {
   "chainId": 8453,
   "network": "base-mainnet",
-  "deployedAt": "2025-11-22",
+  "deployedAt": "2025-11-25",
   "contracts": {
     "Treasury": {
       "proxy": "0xE965E798Fd2cDeA9e5BCeD37292477Cc802d92f2",
       "implementation": "0x8FeD01EB5FC4Ec7f7719a726efFbD19F081c83fC"
     },
     "AccessController": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xb5118513642b8cC05201b68Ed1a4B2cB2db93edE",
+      "implementation": "0xD9C9e166815f1A57B9da26E920e07E72A835B3Ba"
     },
     "Verifier": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xb06d4414B479eb425f6E7d38226d0194C595c7CF",
+      "implementation": "0x374E940AaDce18a9b7259C902b68FF37aa8A07DB"
     },
     "PaymentTracker": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xAA1be2099208db011dFbEa7174114D69982cFcef",
+      "implementation": "0xE94244E9df6fb7F195c094bB4aA15C53f8b558aa"
     },
     "BasePay": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xD47991043dA73bdfcF6c399e5Ed26e5C8D6c3D27",
+      "implementation": "0x546bD44cE5576A6e90cC7150aD93aAD1B06291BE"
     },
     "RulesEngine": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0x7bFA481f050AC09d676A7Ba61397b3f4dac6E558",
+      "implementation": "0xb25dcb1488247Fa0e29e6813fb9BAb630E375517"
     },
     "Registry": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0x273930106653461A2F4f33Ea2821652283dcAE11",
+      "implementation": "0xC1E06BfBBe9b812BFc5feFBe4efDFb7B9A4E64cB"
     },
     "SafeBaseEscrow": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0x1B079e9519CF110b491a231d7AA67c9a597F13B2",
+      "implementation": "0x4b015dF938d053388796078FA3F5145C550C4EE8"
     },
     "Executor": {
-      "proxy": "",
-      "implementation": ""
+      "proxy": "0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94",
+      "implementation": "0xD7fd8D4026123B1c4135cbF6ba91b7A0b3a5C748"
     }
   }
 }

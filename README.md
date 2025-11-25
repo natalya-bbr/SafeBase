@@ -79,10 +79,17 @@ forge script script/DeployAndInteract.s.sol \
 
 ### Base Mainnet
 
-| Contract | Proxy Address | Status |
-|----------|---------------|--------|
+| Contract | Proxy Address | Verified |
+|----------|---------------|----------|
 | Treasury | `0xE965E798Fd2cDeA9e5BCeD37292477Cc802d92f2` | ✅ |
-| Others | - | ⏳ Pending deployment |
+| AccessController | `0xb5118513642b8cC05201b68Ed1a4B2cB2db93edE` | ✅ |
+| Verifier | `0xb06d4414B479eb425f6E7d38226d0194C595c7CF` | ✅ |
+| PaymentTracker | `0xAA1be2099208db011dFbEa7174114D69982cFcef` | ✅ |
+| BasePay | `0xD47991043dA73bdfcF6c399e5Ed26e5C8D6c3D27` | ✅ |
+| RulesEngine | `0x7bFA481f050AC09d676A7Ba61397b3f4dac6E558` | ✅ |
+| Registry | `0x273930106653461A2F4f33Ea2821652283dcAE11` | ✅ |
+| SafeBaseEscrow | `0x1B079e9519CF110b491a231d7AA67c9a597F13B2` | ✅ |
+| Executor | `0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94` | ✅ |
 
 **Network Details:**
 - **Base Sepolia RPC**: `https://sepolia.base.org`
