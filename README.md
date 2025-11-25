@@ -1,14 +1,17 @@
 # SafeBase
 
-Upgradeable multi-signature treasury system for Base network with UUPS proxy pattern.
+Modular, upgradeable escrow and conditional payment protocol for Base L2 with UUPS proxy pattern.
 
 ## Features
 
 - ✅ **UUPS Upgradeable Proxy** - Upgrade contracts without changing addresses
-- ✅ **Multi-sig Withdrawals** - Request → Approve → Execute workflow
-- ✅ **Role-based Access** - Owner, Admins, and Executors
-- ✅ **Base Pay Integration** - Ready for USDC disbursements (TreasuryV2)
-- ✅ **Battle-tested** - Built with OpenZeppelin upgradeable contracts
+- ✅ **Multi-party Escrow** - Buyer + Seller + Mediator workflow with 6-state machine
+- ✅ **Programmable Rules Engine** - Conditional release logic with external verification
+- ✅ **Automated Execution** - Deadline-based auto-refund and auto-release
+- ✅ **Treasury Integration** - Multi-sig treasury for custody management
+- ✅ **Base Pay Bridge** - Offchain/onchain payment integration
+- ✅ **Indexing & Discovery** - Registry for escrow tracking and queries
+- ✅ **Battle-tested** - Built with OpenZeppelin v5.5.0 upgradeable contracts
 
 ## Quick Start
 
@@ -60,28 +63,79 @@ forge script script/DeployAndInteract.s.sol \
 
 ## Deployed Contracts
 
-See [DEPLOYMENTS.md](./DEPLOYMENTS.md) for addresses on all networks.
+### Base Sepolia (Testnet)
+
+| Contract | Proxy Address | Verified |
+|----------|---------------|----------|
+| Treasury | `0x546bD44cE5576A6e90cC7150aD93aAD1B06291BE` | ✅ |
+| AccessController | `0x273930106653461A2F4f33Ea2821652283dcAE11` | ✅ |
+| Verifier | `0x1B079e9519CF110b491a231d7AA67c9a597F13B2` | ✅ |
+| PaymentTracker | `0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94` | ✅ |
+| BasePay | `0x062d3a45862a32BF5D1e35404aaA55e7027c4F4B` | ✅ |
+| RulesEngine | `0xDb1855c6C8ADd51eE4B7e132173cA9833B1DAf07` | ✅ |
+| Registry | `0x57741EE5bAc991D43Cf71207781fCB0eE4b9e9a8` | ✅ |
+| SafeBaseEscrow | `0xA1e13a0E7E54bC71ee4173D74773b455A86816aB` | ✅ |
+| Executor | `0xB49e7b4cCB76B3aE9439798eb980434CBCF8c428` | ✅ |
+
+### Base Mainnet
+
+| Contract | Proxy Address | Verified |
+|----------|---------------|----------|
+| Treasury | `0xE965E798Fd2cDeA9e5BCeD37292477Cc802d92f2` | ✅ |
+| AccessController | `0xb5118513642b8cC05201b68Ed1a4B2cB2db93edE` | ✅ |
+| Verifier | `0xb06d4414B479eb425f6E7d38226d0194C595c7CF` | ✅ |
+| PaymentTracker | `0xAA1be2099208db011dFbEa7174114D69982cFcef` | ✅ |
+| BasePay | `0xD47991043dA73bdfcF6c399e5Ed26e5C8D6c3D27` | ✅ |
+| RulesEngine | `0x7bFA481f050AC09d676A7Ba61397b3f4dac6E558` | ✅ |
+| Registry | `0x273930106653461A2F4f33Ea2821652283dcAE11` | ✅ |
+| SafeBaseEscrow | `0x1B079e9519CF110b491a231d7AA67c9a597F13B2` | ✅ |
+| Executor | `0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94` | ✅ |
+
+**Network Details:**
+- **Base Sepolia RPC**: `https://sepolia.base.org`
+- **Base Mainnet RPC**: `https://mainnet.base.org`
+- **Explorer**: [Basescan](https://basescan.org)
 
 ## Architecture
 
+### Core Escrow System
+
 ```
-┌─────────────────────┐
-│   ERC1967Proxy      │  ← User interacts here
-│  (Treasury Address) │
-└──────────┬──────────┘
-           │ delegatecall
-           ▼
-┌─────────────────────┐
-│   Treasury (v1)     │  ← Implementation
-│   - Multi-sig       │
-│   - Withdrawals     │
-└─────────────────────┘
-           │ upgradeable to
-           ▼
-┌─────────────────────┐
-│   TreasuryV2        │  ← Future upgrade
-│   + Base Pay        │
-└─────────────────────┘
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  SafeBaseEscrow  │────▶│  RulesEngine     │────▶│  Verifier        │
+│  (6-state FSM)   │     │  (Conditions)    │     │  (External)      │
+└────────┬─────────┘     └──────────────────┘     └──────────────────┘
+         │
+         │ custody
+         ▼
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  Treasury        │     │  Registry        │     │  Executor        │
+│  (Multi-sig)     │     │  (Indexing)      │     │  (Automation)    │
+└──────────────────┘     └──────────────────┘     └──────────────────┘
+         ▲
+         │ funding
+         │
+┌──────────────────┐     ┌──────────────────┐
+│  BasePay         │────▶│  PaymentTracker  │
+│  (Bridge)        │     │  (ID Mapping)    │
+└──────────────────┘     └──────────────────┘
+```
+
+### State Machine (SafeBaseEscrow)
+
+```
+Created → Funded → Released (to seller)
+   ↓         ↓
+Cancelled  Refunded (to buyer)
+   ↓         ↓
+Disputed ← ─┘
+```
+
+### UUPS Upgradeability
+
+All contracts use ERC1967Proxy pattern:
+```
+User → Proxy (fixed address) → Implementation (upgradeable)
 ```
 
 ## Usage
