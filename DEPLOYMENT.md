@@ -79,18 +79,16 @@ Both `DeployProxy.s.sol` and `DeployModular.s.sol` now support smart deployment:
 forge script script/DeployModular.s.sol \
   --rpc-url https://mainnet.base.org \
   --broadcast \
-  --verify \
-  --fs-permissions read=deployments/
+  --verify
 
 # Using DeployProxy.s.sol (deploys all contracts)
 forge script script/DeployProxy.s.sol \
   --rpc-url https://mainnet.base.org \
   --broadcast \
-  --verify \
-  --fs-permissions read=deployments/
+  --verify
 ```
 
-⚠️ **Important:** Add `--fs-permissions read=deployments/` to allow reading existing addresses from JSON files.
+✅ **File permissions configured in `foundry.toml`** - scripts can automatically read from `deployments/` directory.
 
 ### Deploy Specific Contract
 
@@ -98,8 +96,7 @@ forge script script/DeployProxy.s.sol \
 DEPLOY_CONTRACT=RulesEngine forge script script/DeployModular.s.sol \
   --rpc-url https://mainnet.base.org \
   --broadcast \
-  --verify \
-  --fs-permissions read=deployments/
+  --verify
 ```
 
 ### How Smart Deployment Works

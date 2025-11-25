@@ -45,7 +45,6 @@ jobs:
             --verify \
             --verifier etherscan \
             --etherscan-api-key ${{ secrets.BASESCAN_API_KEY }} \
-            --fs-permissions read=deployments/ \
             -vvvv
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
