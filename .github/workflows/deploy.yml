@@ -1,4 +1,4 @@
-name: Deploy SafeBase Escrow System
+name: Deploy SafeBase Contracts
 
 on:
   workflow_dispatch:
@@ -10,6 +10,21 @@ on:
         options:
           - sepolia
           - mainnet
+      contract:
+        description: 'Contract to deploy'
+        required: true
+        type: choice
+        options:
+          - all
+          - Treasury
+          - AccessController
+          - Verifier
+          - PaymentTracker
+          - BasePay
+          - RulesEngine
+          - Registry
+          - SafeBaseEscrow
+          - Executor
 
 jobs:
   deploy:
@@ -22,9 +37,9 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Deploy to Base ${{ inputs.network }}
+      - name: Deploy ${{ inputs.contract }} to Base ${{ inputs.network }}
         run: |
-          forge script script/DeployProxy.s.sol \
+          forge script script/DeployModular.s.sol \
             --rpc-url ${{ inputs.network == 'mainnet' && 'https://mainnet.base.org' || 'https://sepolia.base.org' }} \
             --broadcast \
             --verify \
@@ -35,9 +50,12 @@ jobs:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           OWNER_ADDRESS: ${{ secrets.OWNER_ADDRESS }}
           BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+          DEPLOY_CONTRACT: ${{ inputs.contract }}
 
       - name: Save deployment artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: deployment-escrow-${{ inputs.network }}
-          path: broadcast/
+          name: deployment-${{ inputs.contract }}-${{ inputs.network }}-${{ github.run_number }}
+          path: |
+            broadcast/
+            deployments/
