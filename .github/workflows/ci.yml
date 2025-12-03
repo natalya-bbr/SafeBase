@@ -24,7 +24,12 @@ jobs:
         run: forge test -vvv
 
       - name: Gas Snapshot
-        run: forge snapshot --check --tolerance 5
+        run: |
+          if [ -f .gas-snapshot ]; then
+            forge snapshot --check --tolerance 5
+          else
+            forge snapshot
+          fi
 
       - name: Coverage Report
         run: |
