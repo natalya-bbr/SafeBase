@@ -182,6 +182,7 @@ contract SafeBaseEscrowV1 is
 
         uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.seller, escrow.amount);
         treasury.approveWithdrawal(requestId);
+        treasury.executeWithdrawal(requestId);
 
         emit EscrowReleased(_escrowId, escrow.seller);
     }
@@ -199,6 +200,7 @@ contract SafeBaseEscrowV1 is
 
         uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.buyer, escrow.amount);
         treasury.approveWithdrawal(requestId);
+        treasury.executeWithdrawal(requestId);
 
         emit EscrowRefunded(_escrowId, escrow.buyer);
     }
