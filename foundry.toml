@@ -6,6 +6,7 @@ solc_version = "0.8.28"
 optimizer = true
 optimizer_runs = 200
 fs_permissions = [{ access = "read", path = "./deployments" }]
+gas_reports = ["SafeBaseEscrowV1", "RulesEngineV1", "RegistryV1", "ExecutorV1"]
 
 [rpc_endpoints]
 base = "https://mainnet.base.org"
@@ -14,3 +15,9 @@ base-sepolia = "https://sepolia.base.org"
 [etherscan]
 base-sepolia = { key = "${BASESCAN_API_KEY}", url = "https://api-sepolia.basescan.org/api" }
 base = { key = "${BASESCAN_API_KEY}", url = "https://api.basescan.org/api" }
+
+[fuzz]
+runs = 256
+
+[invariant]
+runs = 256
