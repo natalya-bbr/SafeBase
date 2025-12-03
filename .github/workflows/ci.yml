@@ -2,8 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
+    branches: [main, develop]
 
 jobs:
   test:
@@ -17,10 +18,22 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
 
       - name: Build contracts
-        run: forge build
+        run: forge build --sizes
 
       - name: Run tests
         run: forge test -vvv
 
-      - name: Coverage
-        run: forge coverage --report summary
+      - name: Gas Snapshot
+        run: forge snapshot --check --tolerance 5
+
+      - name: Coverage Report
+        run: |
+          forge coverage --report summary
+          forge coverage --report lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./lcov.info
+          flags: foundry
+          fail_ci_if_error: false
