@@ -128,7 +128,8 @@ contract SafeBaseEscrowV1 is
 
         if (escrow.token == address(0)) {
             if (msg.value != escrow.amount) revert InvalidAmount();
-            payable(address(treasury)).transfer(msg.value);
+            (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
+            require(success, "ETH transfer failed");
         }
 
         escrow.state = EscrowState.Funded;
