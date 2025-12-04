@@ -1,0 +1,95 @@
+name: Upgrade Contract
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to upgrade on'
+        required: true
+        type: choice
+        options:
+          - sepolia
+          - mainnet
+      contract:
+        description: 'Contract to upgrade'
+        required: true
+        type: choice
+        options:
+          - Treasury
+          - SafeBaseEscrow
+          - RulesEngine
+          - Registry
+          - Executor
+          - AccessController
+          - Verifier
+          - BasePay
+          - PaymentTracker
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Set RPC URL
+        id: set-rpc
+        run: |
+          if [ "${{ inputs.network }}" = "mainnet" ]; then
+            echo "rpc_url=https://mainnet.base.org" >> $GITHUB_OUTPUT
+            echo "chain_name=Base Mainnet" >> $GITHUB_OUTPUT
+          else
+            echo "rpc_url=https://sepolia.base.org" >> $GITHUB_OUTPUT
+            echo "chain_name=Base Sepolia" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Dry Run - Simulate Upgrade
+        run: |
+          echo "=== Simulating Upgrade ==="
+          echo "Network: ${{ steps.set-rpc.outputs.chain_name }}"
+          echo "Contract: ${{ inputs.contract }}"
+          forge script script/UpgradeContract.s.sol \
+            --rpc-url ${{ steps.set-rpc.outputs.rpc_url }} \
+            -vvv
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          UPGRADE_CONTRACT: ${{ inputs.contract }}
+
+      - name: Upgrade Contract
+        run: |
+          echo "=== Executing Upgrade ==="
+          forge script script/UpgradeContract.s.sol \
+            --rpc-url ${{ steps.set-rpc.outputs.rpc_url }} \
+            --broadcast \
+            --verify \
+            --verifier etherscan \
+            --etherscan-api-key ${{ secrets.BASESCAN_API_KEY }} \
+            -vvvv
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          UPGRADE_CONTRACT: ${{ inputs.contract }}
+          BASESCAN_API_KEY: ${{ secrets.BASESCAN_API_KEY }}
+
+      - name: Save upgrade artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: upgrade-${{ inputs.contract }}-${{ inputs.network }}-${{ github.run_number }}
+          path: |
+            broadcast/
+            cache/
+            out/
+
+      - name: Upgrade Summary
+        run: |
+          echo "## ✅ Upgrade Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Contract:** ${{ inputs.contract }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Network:** ${{ steps.set-rpc.outputs.chain_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the logs above for proxy and implementation addresses." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Important:** Update the deployment JSON file with the new implementation address!" >> $GITHUB_STEP_SUMMARY
