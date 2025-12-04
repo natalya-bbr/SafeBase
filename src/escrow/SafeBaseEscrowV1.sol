@@ -128,7 +128,8 @@ contract SafeBaseEscrowV1 is
 
         if (escrow.token == address(0)) {
             if (msg.value != escrow.amount) revert InvalidAmount();
-            payable(address(treasury)).transfer(msg.value);
+            (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
+            require(success, "ETH transfer failed");
         }
 
         escrow.state = EscrowState.Funded;
@@ -181,6 +182,7 @@ contract SafeBaseEscrowV1 is
 
         uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.seller, escrow.amount);
         treasury.approveWithdrawal(requestId);
+        treasury.executeWithdrawal(requestId);
 
         emit EscrowReleased(_escrowId, escrow.seller);
     }
@@ -198,6 +200,7 @@ contract SafeBaseEscrowV1 is
 
         uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.buyer, escrow.amount);
         treasury.approveWithdrawal(requestId);
+        treasury.executeWithdrawal(requestId);
 
         emit EscrowRefunded(_escrowId, escrow.buyer);
     }

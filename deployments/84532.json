@@ -33,7 +33,7 @@
     },
     "SafeBaseEscrow": {
       "proxy": "0xA1e13a0E7E54bC71ee4173D74773b455A86816aB",
-      "implementation": "0x9b0C3872234e403aa62F7315122019c22D9e4F11"
+      "implementation": "0xF2a7fbffD5760721C99104A7C1f500797F3D1314"
     },
     "Executor": {
       "proxy": "0xB49e7b4cCB76B3aE9439798eb980434CBCF8c428",
