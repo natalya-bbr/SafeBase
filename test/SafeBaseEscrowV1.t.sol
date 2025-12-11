@@ -80,7 +80,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         assertEq(escrowId, 1);
@@ -93,6 +94,7 @@ contract SafeBaseEscrowV1Test is Test {
         assertEq(escrowData.amount, 1 ether);
         assertEq(escrowData.deadline, block.timestamp + 1 days);
         assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Created);
+        assertEq(escrowData.ruleSetId, 0);
     }
 
     function testCreateEscrowZeroSeller() public {
@@ -103,7 +105,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
     }
 
@@ -115,7 +118,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             0,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
     }
 
@@ -127,7 +131,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp - 1
+            block.timestamp - 1,
+            0
         );
     }
 
@@ -138,7 +143,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.expectEmit(true, false, false, true);
@@ -158,7 +164,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.deal(seller, 1 ether);
@@ -174,7 +181,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -192,7 +200,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -207,7 +216,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         bytes32 paymentId = keccak256("payment1");
@@ -230,7 +240,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -253,7 +264,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -271,7 +283,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -292,7 +305,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -315,7 +329,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -344,7 +359,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -367,7 +383,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -385,7 +402,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -413,7 +431,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -439,7 +458,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -457,7 +477,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -480,7 +501,8 @@ contract SafeBaseEscrowV1Test is Test {
             address(0),
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -498,7 +520,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.expectEmit(true, false, false, false);
@@ -518,7 +541,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -540,7 +564,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(owner);
@@ -552,7 +577,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         assertEq(escrowId, 1);
@@ -576,7 +602,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
@@ -605,7 +632,8 @@ contract SafeBaseEscrowV1Test is Test {
             mediator,
             address(0),
             1 ether,
-            block.timestamp + 1 days
+            block.timestamp + 1 days,
+            0
         );
 
         vm.prank(buyer);
@@ -618,6 +646,158 @@ contract SafeBaseEscrowV1Test is Test {
         vm.prank(buyer);
         vm.expectRevert(SafeBaseEscrowV1.InvalidState.selector);
         escrow.fundEscrow{value: 1 ether}(escrowId);
+    }
+
+    function testDisputedToReleased() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(0),
+            1 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 1 ether}(escrowId);
+
+        vm.prank(buyer);
+        escrow.disputeEscrow(escrowId);
+
+        SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
+        assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Disputed);
+
+        uint256 sellerBalanceBefore = seller.balance;
+
+        vm.expectEmit(true, true, false, false);
+        emit EscrowReleased(escrowId, seller);
+
+        vm.prank(mediator);
+        escrow.releaseToSeller(escrowId);
+
+        escrowData = escrow.getEscrow(escrowId);
+        assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Released);
+        assertEq(seller.balance, sellerBalanceBefore + 1 ether);
+    }
+
+    function testDisputedToReleasedRequiresMediator() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(0),
+            1 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 1 ether}(escrowId);
+
+        vm.prank(buyer);
+        escrow.approveBuyer(escrowId);
+
+        vm.prank(buyer);
+        escrow.disputeEscrow(escrowId);
+
+        vm.prank(buyer);
+        vm.expectRevert(SafeBaseEscrowV1.Unauthorized.selector);
+        escrow.releaseToSeller(escrowId);
+    }
+
+    function testMultipleDisputeAttempts() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(0),
+            1 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 1 ether}(escrowId);
+
+        vm.prank(buyer);
+        escrow.disputeEscrow(escrowId);
+
+        SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
+        assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Disputed);
+
+        vm.prank(seller);
+        vm.expectRevert(SafeBaseEscrowV1.InvalidState.selector);
+        escrow.disputeEscrow(escrowId);
+    }
+
+    function testReleaseAfterDeadlineWithApproval() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(0),
+            1 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 1 ether}(escrowId);
+
+        vm.warp(block.timestamp + 2 days);
+
+        vm.prank(buyer);
+        escrow.approveBuyer(escrowId);
+
+        uint256 sellerBalanceBefore = seller.balance;
+
+        vm.prank(buyer);
+        escrow.releaseToSeller(escrowId);
+
+        SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
+        assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Released);
+        assertEq(seller.balance, sellerBalanceBefore + 1 ether);
+    }
+
+    function testCannotReleaseFromCancelledState() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(0),
+            1 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        escrow.cancelEscrow(escrowId);
+
+        vm.prank(buyer);
+        vm.expectRevert(SafeBaseEscrowV1.InvalidState.selector);
+        escrow.releaseToSeller(escrowId);
+    }
+
+    function testCannotRefundFromCancelledState() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(0),
+            1 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        escrow.cancelEscrow(escrowId);
+
+        vm.warp(block.timestamp + 2 days);
+
+        vm.prank(mediator);
+        vm.expectRevert(SafeBaseEscrowV1.InvalidState.selector);
+        escrow.refundToBuyer(escrowId);
     }
 
     receive() external payable {}

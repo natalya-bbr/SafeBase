@@ -7,6 +7,23 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {Treasury} from "../Treasury.sol";
 
+interface IRulesEngine {
+    function canRelease(
+        uint256 ruleSetId,
+        bool buyerApproved,
+        bool sellerApproved,
+        bool isMediatorOverride,
+        uint256 escrowId,
+        bytes calldata verifierData
+    ) external view returns (bool);
+
+    function canRefund(
+        uint256 ruleSetId,
+        uint256 deadline,
+        bool isMediatorOverride
+    ) external view returns (bool);
+}
+
 contract SafeBaseEscrowV1 is
     Initializable,
     UUPSUpgradeable,
@@ -28,6 +45,7 @@ contract SafeBaseEscrowV1 is
         bool sellerApproved;
         bytes32 paymentId;
         uint256 createdAt;
+        uint256 ruleSetId;
     }
 
     Treasury public treasury;
@@ -94,7 +112,8 @@ contract SafeBaseEscrowV1 is
         address _mediator,
         address _token,
         uint256 _amount,
-        uint256 _deadline
+        uint256 _deadline,
+        uint256 _ruleSetId
     ) external whenNotPaused returns (uint256) {
         if (_seller == address(0)) revert InvalidAddress();
         if (_amount == 0) revert InvalidAmount();
@@ -113,7 +132,8 @@ contract SafeBaseEscrowV1 is
             buyerApproved: false,
             sellerApproved: false,
             paymentId: bytes32(0),
-            createdAt: block.timestamp
+            createdAt: block.timestamp,
+            ruleSetId: _ruleSetId
         });
 
         emit EscrowCreated(escrowId, msg.sender, _seller, _token, _amount, _deadline);
@@ -170,13 +190,32 @@ contract SafeBaseEscrowV1 is
 
     function releaseToSeller(uint256 _escrowId) external nonReentrant whenNotPaused {
         EscrowData storage escrow = escrows[_escrowId];
-        if (escrow.state != EscrowState.Funded) revert InvalidState();
+        if (escrow.state != EscrowState.Funded && escrow.state != EscrowState.Disputed) {
+            revert InvalidState();
+        }
 
         bool isMediator = msg.sender == escrow.mediator && escrow.mediator != address(0);
         bool isBuyer = msg.sender == escrow.buyer;
 
         if (!isMediator && !isBuyer) revert Unauthorized();
-        if (!isMediator && !escrow.buyerApproved) revert Unauthorized();
+
+        if (escrow.state == EscrowState.Disputed && !isMediator) {
+            revert Unauthorized();
+        }
+
+        if (rulesEngine != address(0) && escrow.ruleSetId != 0) {
+            bool canRelease = IRulesEngine(rulesEngine).canRelease(
+                escrow.ruleSetId,
+                escrow.buyerApproved,
+                escrow.sellerApproved,
+                isMediator,
+                _escrowId,
+                ""
+            );
+            if (!canRelease) revert Unauthorized();
+        } else {
+            if (!isMediator && !escrow.buyerApproved) revert Unauthorized();
+        }
 
         escrow.state = EscrowState.Released;
 
@@ -192,9 +231,22 @@ contract SafeBaseEscrowV1 is
         if (escrow.state != EscrowState.Funded && escrow.state != EscrowState.Disputed) revert InvalidState();
 
         bool isMediator = msg.sender == escrow.mediator && escrow.mediator != address(0);
-        bool canRefund = isMediator || block.timestamp > escrow.deadline;
 
-        if (!canRefund) revert Unauthorized();
+        if (escrow.state == EscrowState.Disputed && !isMediator) {
+            revert Unauthorized();
+        }
+
+        if (rulesEngine != address(0) && escrow.ruleSetId != 0) {
+            bool canRefund = IRulesEngine(rulesEngine).canRefund(
+                escrow.ruleSetId,
+                escrow.deadline,
+                isMediator
+            );
+            if (!canRefund) revert Unauthorized();
+        } else {
+            bool canRefund = isMediator || block.timestamp > escrow.deadline;
+            if (!canRefund) revert Unauthorized();
+        }
 
         escrow.state = EscrowState.Refunded;
 
