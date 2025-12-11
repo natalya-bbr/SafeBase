@@ -25,7 +25,7 @@
     },
     "RulesEngine": {
       "proxy": "0x7bFA481f050AC09d676A7Ba61397b3f4dac6E558",
-      "implementation": "0xb25dcb1488247Fa0e29e6813fb9BAb630E375517"
+      "implementation": "0xB49e7b4cCB76B3aE9439798eb980434CBCF8c428"
     },
     "Registry": {
       "proxy": "0x273930106653461A2F4f33Ea2821652283dcAE11",
@@ -33,7 +33,7 @@
     },
     "SafeBaseEscrow": {
       "proxy": "0x1B079e9519CF110b491a231d7AA67c9a597F13B2",
-      "implementation": "0x57741EE5bAc991D43Cf71207781fCB0eE4b9e9a8"
+      "implementation": "0xA1e13a0E7E54bC71ee4173D74773b455A86816aB"
     },
     "Executor": {
       "proxy": "0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94",
