@@ -199,6 +199,10 @@ contract SafeBaseEscrowV1 is
 
         if (!isMediator && !isBuyer) revert Unauthorized();
 
+        if (escrow.state == EscrowState.Disputed && !isMediator) {
+            revert Unauthorized();
+        }
+
         if (rulesEngine != address(0) && escrow.ruleSetId != 0) {
             bool canRelease = IRulesEngine(rulesEngine).canRelease(
                 escrow.ruleSetId,
@@ -227,6 +231,10 @@ contract SafeBaseEscrowV1 is
         if (escrow.state != EscrowState.Funded && escrow.state != EscrowState.Disputed) revert InvalidState();
 
         bool isMediator = msg.sender == escrow.mediator && escrow.mediator != address(0);
+
+        if (escrow.state == EscrowState.Disputed && !isMediator) {
+            revert Unauthorized();
+        }
 
         if (rulesEngine != address(0) && escrow.ruleSetId != 0) {
             bool canRefund = IRulesEngine(rulesEngine).canRefund(
