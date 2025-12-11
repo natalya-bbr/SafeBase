@@ -31,10 +31,7 @@ contract RulesEngineV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     error InvalidVerifier();
 
     function initialize(address _owner) public initializer {
-        __Ownable_init();
-        if (_owner != msg.sender) {
-            _transferOwnership(_owner);
-        }
+        __Ownable_init(_owner);
     }
 
     function createRuleSet(

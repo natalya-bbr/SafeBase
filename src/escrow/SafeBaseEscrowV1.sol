@@ -89,16 +89,12 @@ contract SafeBaseEscrowV1 is
     }
 
     function initialize(address _owner, address _treasury) public initializer {
-        __Ownable_init();
+        __Ownable_init(_owner);
         __Pausable_init();
         _reentrancyStatus = 1;
 
         if (_treasury == address(0)) revert InvalidAddress();
         treasury = Treasury(payable(_treasury));
-
-        if (_owner != msg.sender) {
-            _transferOwnership(_owner);
-        }
     }
 
     function setRulesEngine(address _rulesEngine) external onlyOwner {
