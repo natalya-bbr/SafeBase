@@ -696,10 +696,10 @@ contract SafeBaseEscrowV1Test is Test {
         escrow.fundEscrow{value: 1 ether}(escrowId);
 
         vm.prank(buyer);
-        escrow.disputeEscrow(escrowId);
+        escrow.approveBuyer(escrowId);
 
         vm.prank(buyer);
-        escrow.approveBuyer(escrowId);
+        escrow.disputeEscrow(escrowId);
 
         vm.prank(buyer);
         vm.expectRevert(SafeBaseEscrowV1.Unauthorized.selector);
