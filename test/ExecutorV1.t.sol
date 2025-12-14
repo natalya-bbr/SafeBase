@@ -8,6 +8,8 @@ import {ISafeBaseEscrow} from "../src/escrow/ExecutorV1.sol";
 
 contract MockEscrow {
     ISafeBaseEscrow.EscrowData public escrowData;
+    bool public releasedCalled;
+    bool public refundedCalled;
 
     function setEscrow(
         address buyer,
@@ -29,8 +31,13 @@ contract MockEscrow {
         return escrowData;
     }
 
-    function refundToBuyer(uint256) external {}
-    function releaseToSeller(uint256) external {}
+    function refundToBuyer(uint256) external {
+        refundedCalled = true;
+    }
+
+    function releaseToSeller(uint256) external {
+        releasedCalled = true;
+    }
 }
 
 contract MockRulesEngine {
@@ -199,6 +206,24 @@ contract ExecutorV1Test is Test {
 
         vm.prank(automator);
         executor.checkAndExecuteDeadlines(escrowIds);
+
+        assertTrue(escrowContract.refundedCalled());
+    }
+
+    function testCheckAndExecuteReleases() public {
+        vm.prank(owner);
+        executor.addAutomator(automator);
+
+        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, true, true, 1);
+        rulesEngine.setCanRelease(true);
+
+        uint256[] memory escrowIds = new uint256[](1);
+        escrowIds[0] = 1;
+
+        vm.prank(automator);
+        executor.checkAndExecuteReleases(escrowIds);
+
+        assertTrue(escrowContract.releasedCalled());
     }
 
     function testOnlyAutomatorModifier() public {

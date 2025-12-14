@@ -143,6 +143,29 @@ contract ExecutorV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         }
     }
 
+    function checkAndExecuteReleases(uint256[] calldata _escrowIds) external onlyAutomator {
+        for (uint256 i = 0; i < _escrowIds.length; i++) {
+            uint256 escrowId = _escrowIds[i];
+            ISafeBaseEscrow.EscrowData memory e = escrowContract.getEscrow(escrowId);
+
+            if (e.state == 1) {
+                bool canRelease = rulesEngine.canRelease(
+                    e.ruleSetId,
+                    e.buyerApproved,
+                    e.sellerApproved,
+                    false,
+                    escrowId,
+                    ""
+                );
+                if (canRelease) {
+                    try escrowContract.releaseToSeller(escrowId) {
+                        emit AutoReleaseExecuted(escrowId);
+                    } catch {}
+                }
+            }
+        }
+    }
+
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     uint256[50] private __gap;
