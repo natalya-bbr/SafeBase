@@ -8,6 +8,18 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/Pau
 import {Treasury} from "../Treasury.sol";
 import {IERC20} from "../IERC20.sol";
 
+interface IRegistry {
+    function indexEscrow(
+        uint256 escrowId,
+        address buyer,
+        address seller,
+        uint256 amount,
+        uint256 createdAt
+    ) external;
+
+    function updateEscrowState(uint256 escrowId, uint8 state) external;
+}
+
 interface IRulesEngine {
     function canRelease(
         uint256 ruleSetId,
@@ -143,6 +155,10 @@ contract SafeBaseEscrowV1 is
 
         emit EscrowCreated(escrowId, msg.sender, _seller, _token, _amount, _deadline);
 
+        if (registry != address(0)) {
+            IRegistry(registry).indexEscrow(escrowId, msg.sender, _seller, _amount, block.timestamp);
+        }
+
         return escrowId;
     }
 
@@ -162,6 +178,7 @@ contract SafeBaseEscrowV1 is
         }
 
         escrow.state = EscrowState.Funded;
+        _updateRegistryState(_escrowId);
         emit EscrowFunded(_escrowId, escrow.amount);
     }
 
@@ -173,6 +190,7 @@ contract SafeBaseEscrowV1 is
         escrow.paymentId = _paymentId;
         paymentIdToEscrow[_paymentId] = _escrowId;
 
+        _updateRegistryState(_escrowId);
         emit EscrowFunded(_escrowId, escrow.amount);
         emit BasePayFundingReceived(_escrowId, _paymentId);
     }
@@ -235,6 +253,7 @@ contract SafeBaseEscrowV1 is
         treasury.approveWithdrawal(requestId);
         treasury.executeWithdrawal(requestId);
 
+        _updateRegistryState(_escrowId);
         emit EscrowReleased(_escrowId, escrow.seller);
     }
 
@@ -276,6 +295,7 @@ contract SafeBaseEscrowV1 is
         treasury.approveWithdrawal(requestId);
         treasury.executeWithdrawal(requestId);
 
+        _updateRegistryState(_escrowId);
         emit EscrowPartialReleased(_escrowId, escrow.seller, _amount);
     }
 
@@ -309,6 +329,7 @@ contract SafeBaseEscrowV1 is
         treasury.approveWithdrawal(requestId);
         treasury.executeWithdrawal(requestId);
 
+        _updateRegistryState(_escrowId);
         emit EscrowRefunded(_escrowId, escrow.buyer);
     }
 
@@ -319,6 +340,7 @@ contract SafeBaseEscrowV1 is
         if (escrow.mediator == address(0)) revert Unauthorized();
 
         escrow.state = EscrowState.Disputed;
+        _updateRegistryState(_escrowId);
         emit EscrowDisputed(_escrowId, msg.sender);
     }
 
@@ -328,6 +350,7 @@ contract SafeBaseEscrowV1 is
         if (msg.sender != escrow.buyer) revert Unauthorized();
 
         escrow.state = EscrowState.Cancelled;
+        _updateRegistryState(_escrowId);
         emit EscrowCancelled(_escrowId);
     }
 
@@ -344,6 +367,12 @@ contract SafeBaseEscrowV1 is
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
+    function _updateRegistryState(uint256 _escrowId) internal {
+        if (registry != address(0)) {
+            IRegistry(registry).updateEscrowState(_escrowId, uint8(escrows[_escrowId].state));
+        }
+    }
 
     uint256[50] private __gap;
 }

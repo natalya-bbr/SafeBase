@@ -6,11 +6,13 @@ import {SafeBaseEscrowV1} from "../src/escrow/SafeBaseEscrowV1.sol";
 import {Treasury} from "../src/Treasury.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {MockERC20} from "./mocks/MockERC20.sol";
+import {MockRegistry} from "./mocks/MockRegistry.sol";
 
 contract SafeBaseEscrowV1Test is Test {
     SafeBaseEscrowV1 public escrow;
     Treasury public treasury;
     MockERC20 public token;
+    MockRegistry public registry;
 
     address public owner = address(1);
     address public buyer = address(2);
@@ -36,6 +38,7 @@ contract SafeBaseEscrowV1Test is Test {
 
     function setUp() public {
         token = new MockERC20("Test Token", "TEST", 18);
+        registry = new MockRegistry();
 
         Treasury treasuryImpl = new Treasury();
         bytes memory treasuryData = abi.encodeWithSelector(
@@ -58,6 +61,7 @@ contract SafeBaseEscrowV1Test is Test {
         vm.startPrank(owner);
         treasury.addAdmin(address(escrow));
         treasury.addExecutor(address(escrow));
+        escrow.setRegistry(address(registry));
         vm.stopPrank();
 
         vm.deal(buyer, 100 ether);
@@ -207,6 +211,30 @@ contract SafeBaseEscrowV1Test is Test {
         vm.prank(buyer);
         vm.expectRevert(SafeBaseEscrowV1.InvalidAmount.selector);
         escrow.fundEscrow{value: 0.5 ether}(escrowId);
+    }
+
+    function testRegistryIndexAndUpdateOnFund() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(0),
+            1 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        MockRegistry.Indexed memory meta = registry.indexed(escrowId);
+        assertEq(meta.buyer, buyer);
+        assertEq(meta.seller, seller);
+        assertEq(meta.amount, 1 ether);
+        assertEq(meta.createdAt, block.timestamp);
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 1 ether}(escrowId);
+
+        assertEq(registry.lastEscrowId(), escrowId);
+        assertEq(registry.lastState(), uint8(SafeBaseEscrowV1.EscrowState.Funded));
     }
 
     function testFundEscrowERC20() public {
@@ -568,6 +596,8 @@ contract SafeBaseEscrowV1Test is Test {
         SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
         assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Refunded);
         assertEq(buyer.balance, buyerBalanceBefore + 1 ether);
+        assertEq(registry.lastEscrowId(), escrowId);
+        assertEq(registry.lastState(), uint8(SafeBaseEscrowV1.EscrowState.Refunded));
     }
 
     function testRefundToBuyerMediator() public {
