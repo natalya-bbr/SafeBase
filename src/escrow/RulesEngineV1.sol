@@ -107,7 +107,11 @@ contract RulesEngineV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function setDefaultRuleSet(uint256 _ruleSetId) external onlyOwner {
+        RuleSet memory rules = ruleSets[_ruleSetId];
         if (!ruleSetExists[_ruleSetId]) {
+            revert InvalidRuleSet();
+        }
+        if (!rules.requireBuyerApproval && !rules.requireSellerApproval) {
             revert InvalidRuleSet();
         }
         defaultRuleSetId = _ruleSetId;
