@@ -27,31 +27,19 @@ contract MockEscrow {
         uint256 deadline,
         uint8 state,
         bool buyerApproved,
-        bool sellerApproved
+        bool sellerApproved,
+        uint256 ruleSetId
     ) external {
         escrowData.buyer = buyer;
         escrowData.deadline = deadline;
         escrowData.state = state;
         escrowData.buyerApproved = buyerApproved;
         escrowData.sellerApproved = sellerApproved;
+        escrowData.ruleSetId = ruleSetId;
     }
 
-    function getEscrow(uint256) external view returns (
-        address, address, address, address, uint256, uint256, uint8, bool, bool, bytes32, uint256
-    ) {
-        return (
-            escrowData.buyer,
-            escrowData.seller,
-            escrowData.mediator,
-            escrowData.token,
-            escrowData.amount,
-            escrowData.deadline,
-            escrowData.state,
-            escrowData.buyerApproved,
-            escrowData.sellerApproved,
-            escrowData.paymentId,
-            escrowData.createdAt
-        );
+    function getEscrow(uint256) external view returns (ISafeBaseEscrow.EscrowData memory) {
+        return escrowData;
     }
 
     function refundToBuyer(uint256) external {}
@@ -172,7 +160,7 @@ contract ExecutorV1Test is Test {
         vm.prank(owner);
         executor.addAutomator(automator);
 
-        escrowContract.setEscrow(address(3), block.timestamp - 1, 1, false, false);
+        escrowContract.setEscrow(address(3), block.timestamp - 1, 1, false, false, 1);
         rulesEngine.setCanRelease(true);
 
         vm.expectEmit(true, false, false, false);
@@ -188,7 +176,7 @@ contract ExecutorV1Test is Test {
         vm.prank(owner);
         executor.addAutomator(automator);
 
-        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, false, false);
+        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, false, false, 1);
         rulesEngine.setCanRelease(false);
 
         vm.prank(automator);
@@ -200,7 +188,7 @@ contract ExecutorV1Test is Test {
         vm.prank(owner);
         executor.addAutomator(automator);
 
-        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, true, true);
+        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, true, true, 1);
         rulesEngine.setCanRelease(true);
 
         vm.expectEmit(true, false, false, false);
@@ -216,14 +204,14 @@ contract ExecutorV1Test is Test {
         vm.prank(owner);
         executor.addAutomator(automator);
 
-        escrowContract.setEscrow(address(3), block.timestamp - 1, 1, false, false);
+        escrowContract.setEscrow(address(3), block.timestamp - 1, 1, false, false, 1);
         rulesEngine.setCanRelease(true);
 
         uint256[] memory escrowIds = new uint256[](1);
         escrowIds[0] = 1;
 
         vm.prank(automator);
-        executor.checkAndExecuteDeadlines(escrowIds, 1);
+        executor.checkAndExecuteDeadlines(escrowIds);
     }
 
     function testOnlyAutomatorModifier() public {

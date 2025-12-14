@@ -6,19 +6,23 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 interface ISafeBaseEscrow {
-    function getEscrow(uint256 escrowId) external view returns (
-        address buyer,
-        address seller,
-        address mediator,
-        address token,
-        uint256 amount,
-        uint256 deadline,
-        uint8 state,
-        bool buyerApproved,
-        bool sellerApproved,
-        bytes32 paymentId,
-        uint256 createdAt
-    );
+    struct EscrowData {
+        address buyer;
+        address seller;
+        address mediator;
+        address token;
+        uint256 amount;
+        uint256 releasedAmount;
+        uint256 deadline;
+        uint8 state;
+        bool buyerApproved;
+        bool sellerApproved;
+        bytes32 paymentId;
+        uint256 createdAt;
+        uint256 ruleSetId;
+    }
+
+    function getEscrow(uint256 escrowId) external view returns (EscrowData memory);
     function refundToBuyer(uint256 escrowId) external;
     function releaseToSeller(uint256 escrowId) external;
 }
@@ -88,23 +92,11 @@ contract ExecutorV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         emit DeadlineCheckScheduled(_escrowId, _deadline);
     }
 
-    function executeAutoRefund(uint256 _escrowId, uint256 _ruleSetId) external onlyAutomator {
-        (
-            ,
-            ,
-            ,
-            ,
-            ,
-            uint256 deadline,
-            uint8 state,
-            ,
-            ,
-            ,
-        ) = escrowContract.getEscrow(_escrowId);
+    function executeAutoRefund(uint256 _escrowId) external onlyAutomator {
+        ISafeBaseEscrow.EscrowData memory e = escrowContract.getEscrow(_escrowId);
+        if (e.state != 1) revert InvalidState();
 
-        if (state != 1) revert InvalidState();
-
-        bool canRefund = rulesEngine.canRefund(_ruleSetId, deadline, false);
+        bool canRefund = rulesEngine.canRefund(e.ruleSetId, e.deadline, false);
         if (!canRefund) revert DeadlineNotReached();
 
         escrowContract.refundToBuyer(_escrowId);
@@ -113,26 +105,14 @@ contract ExecutorV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         emit AutoRefundExecuted(_escrowId);
     }
 
-    function executeAutoRelease(uint256 _escrowId, uint256 _ruleSetId) external onlyAutomator {
-        (
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            uint8 state,
-            bool buyerApproved,
-            bool sellerApproved,
-            ,
-        ) = escrowContract.getEscrow(_escrowId);
-
-        if (state != 1) revert InvalidState();
+    function executeAutoRelease(uint256 _escrowId) external onlyAutomator {
+        ISafeBaseEscrow.EscrowData memory e = escrowContract.getEscrow(_escrowId);
+        if (e.state != 1) revert InvalidState();
 
         bool canRelease = rulesEngine.canRelease(
-            _ruleSetId,
-            buyerApproved,
-            sellerApproved,
+            e.ruleSetId,
+            e.buyerApproved,
+            e.sellerApproved,
             false,
             _escrowId,
             ""
@@ -146,25 +126,14 @@ contract ExecutorV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         emit AutoReleaseExecuted(_escrowId);
     }
 
-    function checkAndExecuteDeadlines(uint256[] calldata _escrowIds, uint256 _ruleSetId) external onlyAutomator {
+    function checkAndExecuteDeadlines(uint256[] calldata _escrowIds) external onlyAutomator {
         for (uint256 i = 0; i < _escrowIds.length; i++) {
             uint256 escrowId = _escrowIds[i];
 
-            (
-                ,
-                ,
-                ,
-                ,
-                ,
-                uint256 deadline,
-                uint8 state,
-                ,
-                ,
-                ,
-            ) = escrowContract.getEscrow(escrowId);
+            ISafeBaseEscrow.EscrowData memory e = escrowContract.getEscrow(escrowId);
 
-            if (state == 1 && block.timestamp > deadline) {
-                bool canRefund = rulesEngine.canRefund(_ruleSetId, deadline, false);
+            if (e.state == 1 && block.timestamp > e.deadline) {
+                bool canRefund = rulesEngine.canRefund(e.ruleSetId, e.deadline, false);
                 if (canRefund) {
                     try escrowContract.refundToBuyer(escrowId) {
                         emit AutoRefundExecuted(escrowId);
