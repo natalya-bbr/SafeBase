@@ -80,11 +80,11 @@ contract DeployModularScript is Script {
         return addrs;
     }
 
-    function deployContract(string memory contractName, address owner, ExistingAddresses memory existing) internal returns (address) {
+    function deployContract(string memory contractName, address owner, ExistingAddresses memory existing, bool forceNew) internal returns (address) {
         bytes32 nameHash = keccak256(bytes(contractName));
 
         if (nameHash == keccak256("Treasury")) {
-            if (existing.treasury != address(0)) {
+            if (!forceNew && existing.treasury != address(0)) {
                 console.log("Treasury already deployed:", existing.treasury);
                 return existing.treasury;
             }
@@ -96,7 +96,7 @@ contract DeployModularScript is Script {
         }
 
         if (nameHash == keccak256("AccessController")) {
-            if (existing.accessController != address(0)) {
+            if (!forceNew && existing.accessController != address(0)) {
                 console.log("AccessController already deployed:", existing.accessController);
                 return existing.accessController;
             }
@@ -108,7 +108,7 @@ contract DeployModularScript is Script {
         }
 
         if (nameHash == keccak256("Verifier")) {
-            if (existing.verifier != address(0)) {
+            if (!forceNew && existing.verifier != address(0)) {
                 console.log("Verifier already deployed:", existing.verifier);
                 return existing.verifier;
             }
@@ -120,7 +120,7 @@ contract DeployModularScript is Script {
         }
 
         if (nameHash == keccak256("PaymentTracker")) {
-            if (existing.paymentTracker != address(0)) {
+            if (!forceNew && existing.paymentTracker != address(0)) {
                 console.log("PaymentTracker already deployed:", existing.paymentTracker);
                 return existing.paymentTracker;
             }
@@ -132,7 +132,7 @@ contract DeployModularScript is Script {
         }
 
         if (nameHash == keccak256("BasePay")) {
-            if (existing.basePay != address(0)) {
+            if (!forceNew && existing.basePay != address(0)) {
                 console.log("BasePay already deployed:", existing.basePay);
                 return existing.basePay;
             }
@@ -144,7 +144,7 @@ contract DeployModularScript is Script {
         }
 
         if (nameHash == keccak256("RulesEngine")) {
-            if (existing.rulesEngine != address(0)) {
+            if (!forceNew && existing.rulesEngine != address(0)) {
                 console.log("RulesEngine already deployed:", existing.rulesEngine);
                 return existing.rulesEngine;
             }
@@ -156,7 +156,7 @@ contract DeployModularScript is Script {
         }
 
         if (nameHash == keccak256("Registry")) {
-            if (existing.registry != address(0)) {
+            if (!forceNew && existing.registry != address(0)) {
                 console.log("Registry already deployed:", existing.registry);
                 return existing.registry;
             }
@@ -168,7 +168,7 @@ contract DeployModularScript is Script {
         }
 
         if (nameHash == keccak256("SafeBaseEscrow")) {
-            if (existing.escrow != address(0)) {
+            if (!forceNew && existing.escrow != address(0)) {
                 console.log("SafeBaseEscrow already deployed:", existing.escrow);
                 return existing.escrow;
             }
@@ -181,7 +181,7 @@ contract DeployModularScript is Script {
         }
 
         if (nameHash == keccak256("Executor")) {
-            if (existing.executor != address(0)) {
+            if (!forceNew && existing.executor != address(0)) {
                 console.log("Executor already deployed:", existing.executor);
                 return existing.executor;
             }
@@ -201,6 +201,7 @@ contract DeployModularScript is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address owner = vm.envAddress("OWNER_ADDRESS");
         string memory targetContract = vm.envOr("DEPLOY_CONTRACT", string("all"));
+        bool forceNew = vm.envOr("FORCE_NEW", false);
 
         console.log("=== SafeBase Modular Deployment ===");
         console.log("Chain ID:", block.chainid);
@@ -214,15 +215,15 @@ contract DeployModularScript is Script {
         if (keccak256(bytes(targetContract)) == keccak256("all")) {
             console.log("\n--- Deploying all contracts ---");
 
-            existing.treasury = deployContract("Treasury", owner, existing);
-            existing.accessController = deployContract("AccessController", owner, existing);
-            existing.verifier = deployContract("Verifier", owner, existing);
-            existing.paymentTracker = deployContract("PaymentTracker", owner, existing);
-            existing.basePay = deployContract("BasePay", owner, existing);
-            existing.rulesEngine = deployContract("RulesEngine", owner, existing);
-            existing.registry = deployContract("Registry", owner, existing);
-            existing.escrow = deployContract("SafeBaseEscrow", owner, existing);
-            existing.executor = deployContract("Executor", owner, existing);
+            existing.treasury = deployContract("Treasury", owner, existing, forceNew);
+            existing.accessController = deployContract("AccessController", owner, existing, forceNew);
+            existing.verifier = deployContract("Verifier", owner, existing, forceNew);
+            existing.paymentTracker = deployContract("PaymentTracker", owner, existing, forceNew);
+            existing.basePay = deployContract("BasePay", owner, existing, forceNew);
+            existing.rulesEngine = deployContract("RulesEngine", owner, existing, forceNew);
+            existing.registry = deployContract("Registry", owner, existing, forceNew);
+            existing.escrow = deployContract("SafeBaseEscrow", owner, existing, forceNew);
+            existing.executor = deployContract("Executor", owner, existing, forceNew);
 
             if (existing.escrow != address(0) && existing.rulesEngine != address(0) && existing.registry != address(0)) {
                 SafeBaseEscrowV1(existing.escrow).setRulesEngine(existing.rulesEngine);
@@ -242,7 +243,7 @@ contract DeployModularScript is Script {
             }
         } else {
             console.log("\n--- Deploying single contract ---");
-            deployContract(targetContract, owner, existing);
+            deployContract(targetContract, owner, existing, forceNew);
         }
 
         vm.stopBroadcast();

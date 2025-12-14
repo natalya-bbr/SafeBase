@@ -37,7 +37,7 @@
     },
     "Executor": {
       "proxy": "0xB49e7b4cCB76B3aE9439798eb980434CBCF8c428",
-      "implementation": "0x6112146dea7A81D2F3F189084608a99BCAA2F388"
+      "implementation": "0x9Bc334daCcB224cac61BDbeB97669BB1C67dBe1E"
     }
   }
 }
