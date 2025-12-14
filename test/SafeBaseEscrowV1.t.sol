@@ -224,11 +224,11 @@ contract SafeBaseEscrowV1Test is Test {
             0
         );
 
-        MockRegistry.Indexed memory meta = registry.indexedEscrows(escrowId);
-        assertEq(meta.buyer, buyer);
-        assertEq(meta.seller, seller);
-        assertEq(meta.amount, 1 ether);
-        assertEq(meta.createdAt, block.timestamp);
+        (address b, address s, uint256 amt, uint256 ts) = registry.indexedEscrows(escrowId);
+        assertEq(b, buyer);
+        assertEq(s, seller);
+        assertEq(amt, 1 ether);
+        assertEq(ts, block.timestamp);
 
         vm.prank(buyer);
         escrow.fundEscrow{value: 1 ether}(escrowId);
