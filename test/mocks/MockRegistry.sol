@@ -10,7 +10,7 @@ contract MockRegistry {
         uint256 amount;
         uint256 createdAt;
     }
-    mapping(uint256 => Indexed) public indexed;
+    mapping(uint256 => Indexed) public indexedEscrows;
 
     function indexEscrow(
         uint256 escrowId,
@@ -19,7 +19,7 @@ contract MockRegistry {
         uint256 amount,
         uint256 createdAt
     ) external {
-        indexed[escrowId] = Indexed(buyer, seller, amount, createdAt);
+        indexedEscrows[escrowId] = Indexed(buyer, seller, amount, createdAt);
         lastEscrowId = escrowId;
     }
 

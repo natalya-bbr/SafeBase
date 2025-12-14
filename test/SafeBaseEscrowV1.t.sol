@@ -224,7 +224,7 @@ contract SafeBaseEscrowV1Test is Test {
             0
         );
 
-        MockRegistry.Indexed memory meta = registry.indexed(escrowId);
+        MockRegistry.Indexed memory meta = registry.indexedEscrows(escrowId);
         assertEq(meta.buyer, buyer);
         assertEq(meta.seller, seller);
         assertEq(meta.amount, 1 ether);

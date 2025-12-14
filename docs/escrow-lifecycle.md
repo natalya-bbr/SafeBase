@@ -12,9 +12,9 @@ SafeBase escrow system is a production-grade, modular escrow and conditional pay
 ### States (6 total)
 
 1. **Created** - Initial state after escrow creation
-2. **Funded** - Funds deposited (via direct funding or Base Pay)
-3. **Released** - Funds released to seller (terminal state)
-4. **Refunded** - Funds refunded to buyer (terminal state)
+2. **Funded** - Funds deposited (via direct funding or Base Pay; ETH or ERC20)
+3. **Released** - Funds released to seller (terminal state; may reach via partial releases)
+4. **Refunded** - Funds refunded to buyer (terminal state; remaining amount after partial releases)
 5. **Disputed** - Dispute raised, requires mediator intervention
 6. **Cancelled** - Escrow cancelled before funding (terminal state)
 
@@ -39,9 +39,9 @@ Created ──fundEscrow()──────────> Funded ──releaseTo
 | Created    | Funded     | fundEscrow()         | Buyer only                                       |
 | Created    | Funded     | fundEscrowWithBasePay() | Anyone (off-chain verified)                   |
 | Created    | Cancelled  | cancelEscrow()       | Buyer only                                       |
-| Funded     | Released   | releaseToSeller()    | Buyer (with approval) OR Mediator               |
-| Funded     | Refunded   | refundToBuyer()      | Mediator OR Anyone after deadline               |
-| Funded     | Disputed   | disputeEscrow()      | Buyer OR Seller (requires mediator set)         |
+| Funded     | Released   | releaseToSeller()    | Buyer (with approval) OR Mediator                |
+| Funded     | Refunded   | refundToBuyer()      | Mediator OR Anyone after deadline                |
+| Funded     | Disputed   | disputeEscrow()      | Buyer OR Seller (requires mediator set)          |
 | Disputed   | Released   | releaseToSeller()    | Mediator only                                    |
 | Disputed   | Refunded   | refundToBuyer()      | Mediator only                                    |
 
@@ -145,7 +145,7 @@ struct RuleSet {
 
 ## Integration Patterns
 
-### Standard Escrow Flow
+### Standard Escrow Flow (ETH)
 ```solidity
 // 1. Create escrow
 uint256 escrowId = escrow.createEscrow(
@@ -175,6 +175,28 @@ escrow.fundEscrowWithBasePay(escrowId, paymentId);
 ```
 
 ### Dispute Resolution
+
+### ERC20 Funding
+```solidity
+escrow.createEscrow(
+    seller,
+    mediator,
+    address(token), // ERC20
+    100 ether,
+    block.timestamp + 7 days,
+    ruleSetId
+);
+
+token.approve(address(escrow), 100 ether);
+escrow.fundEscrow(escrowId); // msg.value must be 0
+```
+
+### Partial Releases
+```solidity
+// After approvals / rules allow
+escrow.releasePartialToSeller(escrowId, 40 ether); // updates state, Registry, Treasury withdrawal
+// Remaining amount stays in escrow until released or refunded
+```
 ```solidity
 // Buyer raises dispute
 escrow.disputeEscrow(escrowId);
@@ -231,12 +253,10 @@ SafeBaseEscrowV1 uses UUPS proxy pattern:
 
 ## Future Enhancements (Beyond Block 1)
 
-1. **Partial releases**: Split payments for milestone-based escrows
-2. **Multi-token support**: ERC20 token escrows (currently ETH only)
-3. **Time-locked releases**: Automatic release after deadline + approval
-4. **Appeal mechanism**: Secondary mediator for disputed cases
-5. **Escrow templates**: Pre-configured rule sets for common use cases
-6. **Event-driven automation**: Executor integration for auto-release/refund
+1. **Time-locked releases**: Automatic release after deadline + approval
+2. **Appeal mechanism**: Secondary mediator for disputed cases
+3. **Escrow templates**: Pre-configured rule sets for common use cases
+4. **Event-driven automation**: Executor integration for auto-release/refund
 
 ---
 
