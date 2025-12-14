@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {ExecutorV1} from "../src/escrow/ExecutorV1.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ISafeBaseEscrow} from "../src/escrow/ExecutorV1.sol";
 
 contract MockEscrow {
     struct EscrowData {
