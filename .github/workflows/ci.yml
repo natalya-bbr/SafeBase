@@ -32,6 +32,8 @@ jobs:
           fi
 
       - name: Coverage Report
+        env:
+          FOUNDRY_PROFILE: coverage
         run: |
           forge coverage --report summary
           forge coverage --report lcov
