@@ -209,6 +209,51 @@ contract SafeBaseEscrowV1Test is Test {
         escrow.fundEscrow{value: 0.5 ether}(escrowId);
     }
 
+    function testFundEscrowERC20() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(token),
+            100 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        token.approve(address(escrow), 100 ether);
+
+        vm.expectEmit(true, false, false, true);
+        emit EscrowFunded(escrowId, 100 ether);
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 0}(escrowId);
+
+        SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
+        assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Funded);
+        assertEq(token.balanceOf(address(treasury)), 100 ether);
+        assertEq(token.balanceOf(buyer), 900 ether);
+    }
+
+    function testFundEscrowERC20RejectsValue() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(token),
+            1 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        token.approve(address(escrow), 1 ether);
+
+        vm.prank(buyer);
+        vm.expectRevert(SafeBaseEscrowV1.InvalidAmount.selector);
+        escrow.fundEscrow{value: 1 wei}(escrowId);
+    }
+
     function testFundEscrowWithBasePay() public {
         vm.prank(buyer);
         uint256 escrowId = escrow.createEscrow(
@@ -350,6 +395,107 @@ contract SafeBaseEscrowV1Test is Test {
         SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
         assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Released);
         assertEq(seller.balance, sellerBalanceBefore + 1 ether);
+    }
+
+    function testPartialReleaseThenRefundRemainingERC20() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(token),
+            100 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        token.approve(address(escrow), 100 ether);
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 0}(escrowId);
+
+        vm.prank(buyer);
+        escrow.approveBuyer(escrowId);
+
+        uint256 sellerBalanceBefore = token.balanceOf(seller);
+
+        vm.prank(buyer);
+        escrow.releasePartialToSeller(escrowId, 40 ether);
+
+        SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
+        assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Funded);
+        assertEq(escrowData.releasedAmount, 40 ether);
+        assertEq(token.balanceOf(seller), sellerBalanceBefore + 40 ether);
+
+        vm.warp(block.timestamp + 2 days);
+
+        uint256 buyerBalanceBefore = token.balanceOf(buyer);
+
+        vm.prank(buyer);
+        escrow.refundToBuyer(escrowId);
+
+        escrowData = escrow.getEscrow(escrowId);
+        assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Refunded);
+        assertEq(token.balanceOf(buyer), buyerBalanceBefore + 60 ether);
+    }
+
+    function testPartialReleaseFullAmountSetsReleased() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(token),
+            50 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        token.approve(address(escrow), 50 ether);
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 0}(escrowId);
+
+        vm.prank(buyer);
+        escrow.approveBuyer(escrowId);
+
+        vm.prank(buyer);
+        escrow.releasePartialToSeller(escrowId, 20 ether);
+
+        vm.prank(buyer);
+        escrow.releasePartialToSeller(escrowId, 30 ether);
+
+        SafeBaseEscrowV1.EscrowData memory escrowData = escrow.getEscrow(escrowId);
+        assertTrue(escrowData.state == SafeBaseEscrowV1.EscrowState.Released);
+        assertEq(escrowData.releasedAmount, 50 ether);
+    }
+
+    function testPartialReleaseExceedsAmount() public {
+        vm.prank(buyer);
+        uint256 escrowId = escrow.createEscrow(
+            seller,
+            mediator,
+            address(token),
+            10 ether,
+            block.timestamp + 1 days,
+            0
+        );
+
+        vm.prank(buyer);
+        token.approve(address(escrow), 10 ether);
+
+        vm.prank(buyer);
+        escrow.fundEscrow{value: 0}(escrowId);
+
+        vm.prank(buyer);
+        escrow.approveBuyer(escrowId);
+
+        vm.prank(buyer);
+        escrow.releasePartialToSeller(escrowId, 9 ether);
+
+        vm.prank(buyer);
+        vm.expectRevert(SafeBaseEscrowV1.AmountExceeded.selector);
+        escrow.releasePartialToSeller(escrowId, 2 ether);
     }
 
     function testReleaseToSellerMediator() public {

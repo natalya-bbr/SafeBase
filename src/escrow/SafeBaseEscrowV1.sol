@@ -6,6 +6,7 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/U
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {Treasury} from "../Treasury.sol";
+import {IERC20} from "../IERC20.sol";
 
 interface IRulesEngine {
     function canRelease(
@@ -39,6 +40,7 @@ contract SafeBaseEscrowV1 is
         address mediator;
         address token;
         uint256 amount;
+        uint256 releasedAmount;
         uint256 deadline;
         EscrowState state;
         bool buyerApproved;
@@ -67,6 +69,7 @@ contract SafeBaseEscrowV1 is
 
     event EscrowFunded(uint256 indexed escrowId, uint256 amount);
     event EscrowReleased(uint256 indexed escrowId, address indexed recipient);
+    event EscrowPartialReleased(uint256 indexed escrowId, address indexed recipient, uint256 amount);
     event EscrowRefunded(uint256 indexed escrowId, address indexed recipient);
     event EscrowDisputed(uint256 indexed escrowId, address indexed initiator);
     event EscrowCancelled(uint256 indexed escrowId);
@@ -80,6 +83,7 @@ contract SafeBaseEscrowV1 is
     error InvalidAddress();
     error EscrowNotFound();
     error AlreadyApproved();
+    error AmountExceeded();
 
     modifier nonReentrant() {
         require(_reentrancyStatus != 2, "ReentrancyGuard: reentrant call");
@@ -127,6 +131,7 @@ contract SafeBaseEscrowV1 is
             mediator: _mediator,
             token: _token,
             amount: _amount,
+            releasedAmount: 0,
             deadline: _deadline,
             state: EscrowState.Created,
             buyerApproved: false,
@@ -150,6 +155,10 @@ contract SafeBaseEscrowV1 is
             if (msg.value != escrow.amount) revert InvalidAmount();
             (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
             require(success, "ETH transfer failed");
+        } else {
+            if (msg.value != 0) revert InvalidAmount();
+            bool ok = IERC20(escrow.token).transferFrom(msg.sender, address(treasury), escrow.amount);
+            require(ok, "ERC20 transfer failed");
         }
 
         escrow.state = EscrowState.Funded;
@@ -217,13 +226,57 @@ contract SafeBaseEscrowV1 is
             if (!isMediator && !escrow.buyerApproved) revert Unauthorized();
         }
 
+        uint256 remaining = escrow.amount - escrow.releasedAmount;
+        if (remaining == 0) revert AmountExceeded();
+        escrow.releasedAmount = escrow.amount;
         escrow.state = EscrowState.Released;
 
-        uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.seller, escrow.amount);
+        uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.seller, remaining);
         treasury.approveWithdrawal(requestId);
         treasury.executeWithdrawal(requestId);
 
         emit EscrowReleased(_escrowId, escrow.seller);
+    }
+
+    function releasePartialToSeller(uint256 _escrowId, uint256 _amount) external nonReentrant whenNotPaused {
+        EscrowData storage escrow = escrows[_escrowId];
+        if (escrow.state != EscrowState.Funded && escrow.state != EscrowState.Disputed) {
+            revert InvalidState();
+        }
+        if (_amount == 0) revert InvalidAmount();
+
+        bool isMediator = msg.sender == escrow.mediator && escrow.mediator != address(0);
+        bool isBuyer = msg.sender == escrow.buyer;
+        if (!isMediator && !isBuyer) revert Unauthorized();
+        if (escrow.state == EscrowState.Disputed && !isMediator) revert Unauthorized();
+
+        if (rulesEngine != address(0) && escrow.ruleSetId != 0) {
+            bool canRelease = IRulesEngine(rulesEngine).canRelease(
+                escrow.ruleSetId,
+                escrow.buyerApproved,
+                escrow.sellerApproved,
+                isMediator,
+                _escrowId,
+                ""
+            );
+            if (!canRelease) revert Unauthorized();
+        } else {
+            if (!isMediator && !escrow.buyerApproved) revert Unauthorized();
+        }
+
+        uint256 remaining = escrow.amount - escrow.releasedAmount;
+        if (_amount > remaining) revert AmountExceeded();
+
+        escrow.releasedAmount += _amount;
+        if (escrow.releasedAmount == escrow.amount) {
+            escrow.state = EscrowState.Released;
+        }
+
+        uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.seller, _amount);
+        treasury.approveWithdrawal(requestId);
+        treasury.executeWithdrawal(requestId);
+
+        emit EscrowPartialReleased(_escrowId, escrow.seller, _amount);
     }
 
     function refundToBuyer(uint256 _escrowId) external nonReentrant whenNotPaused {
@@ -248,9 +301,11 @@ contract SafeBaseEscrowV1 is
             if (!canRefund) revert Unauthorized();
         }
 
+        uint256 remaining = escrow.amount - escrow.releasedAmount;
+        if (remaining == 0) revert AmountExceeded();
         escrow.state = EscrowState.Refunded;
 
-        uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.buyer, escrow.amount);
+        uint256 requestId = treasury.requestWithdrawal(escrow.token, escrow.buyer, remaining);
         treasury.approveWithdrawal(requestId);
         treasury.executeWithdrawal(requestId);
 
