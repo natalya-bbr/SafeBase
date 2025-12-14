@@ -24,16 +24,16 @@
       "implementation": "0xCB66CBF0A09c3Bf336f1290DFB6e6CfB213132Ff"
     },
     "RulesEngine": {
-      "proxy": "0xDb1855c6C8ADd51eE4B7e132173cA9833B1DAf07",
-      "implementation": "0xFA439194fe9B624AD51f7ecccf9FbcdB4350Bc70"
+      "proxy": "0xFA194dd94Fb7E8253fb6717eF4C6C23D4b2Cc7A2",
+      "implementation": "0x1d4036bbc2960a6b572D07eab33a3744FbF354D6"
     },
     "Registry": {
       "proxy": "0x57741EE5bAc991D43Cf71207781fCB0eE4b9e9a8",
       "implementation": "0x509014Ac3d57ee08B2A47639aCDeEaE1B700960f"
     },
     "SafeBaseEscrow": {
-      "proxy": "0xA1e13a0E7E54bC71ee4173D74773b455A86816aB",
-      "implementation": "0x682026827839A367252Ec80a0bbaaA47AFA3d870"
+      "proxy": "0x2a441dD6a9B81013D49C1d553e8c42Cb32679652",
+      "implementation": "0x675c3F20aC7E6C7BF64D07F079EC84785610c12e"
     },
     "Executor": {
       "proxy": "0xB49e7b4cCB76B3aE9439798eb980434CBCF8c428",
