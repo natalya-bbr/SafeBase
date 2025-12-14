@@ -207,6 +207,7 @@ contract DeployModularScript is Script {
         console.log("Chain ID:", block.chainid);
         console.log("Owner:", owner);
         console.log("Target:", targetContract);
+        console.log("Force new:", forceNew ? "true" : "false");
 
         ExistingAddresses memory existing = loadExistingAddresses();
 
