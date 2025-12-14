@@ -35,8 +35,8 @@ jobs:
         env:
           FOUNDRY_PROFILE: coverage
         run: |
-          forge coverage --report summary
-          forge coverage --report lcov
+          forge coverage --report summary --ir-minimum
+          forge coverage --report lcov --ir-minimum
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
