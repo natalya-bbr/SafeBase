@@ -20,7 +20,18 @@ contract RulesEngineV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         address externalVerifier;
     }
 
+    struct RuleSetInput {
+        bool requireBuyerApproval;
+        bool requireSellerApproval;
+        bool autoRefundAfterDeadline;
+        bool autoReleaseOnFullApproval;
+        bool mediatorOverrideEnabled;
+        bool externalVerifierEnabled;
+        address externalVerifier;
+    }
+
     mapping(uint256 => RuleSet) public ruleSets;
+    mapping(uint256 => bool) public ruleSetExists;
     uint256 public defaultRuleSetId;
 
     event RuleSetCreated(uint256 indexed ruleSetId);
@@ -56,7 +67,7 @@ contract RulesEngineV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             )
         );
 
-        ruleSets[ruleSetId] = RuleSet({
+        _writeRuleSet(ruleSetId, RuleSetInput({
             requireBuyerApproval: _requireBuyerApproval,
             requireSellerApproval: _requireSellerApproval,
             autoRefundAfterDeadline: _autoRefundAfterDeadline,
@@ -64,15 +75,39 @@ contract RulesEngineV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             mediatorOverrideEnabled: _mediatorOverrideEnabled,
             externalVerifierEnabled: _externalVerifierEnabled,
             externalVerifier: _externalVerifier
-        });
+        }));
 
         emit RuleSetCreated(ruleSetId);
         return ruleSetId;
     }
 
+    function updateRuleSet(
+        uint256 _ruleSetId,
+        bool _requireBuyerApproval,
+        bool _requireSellerApproval,
+        bool _autoRefundAfterDeadline,
+        bool _autoReleaseOnFullApproval,
+        bool _mediatorOverrideEnabled,
+        bool _externalVerifierEnabled,
+        address _externalVerifier
+    ) external onlyOwner {
+        if (!ruleSetExists[_ruleSetId]) revert InvalidRuleSet();
+
+        _writeRuleSet(_ruleSetId, RuleSetInput({
+            requireBuyerApproval: _requireBuyerApproval,
+            requireSellerApproval: _requireSellerApproval,
+            autoRefundAfterDeadline: _autoRefundAfterDeadline,
+            autoReleaseOnFullApproval: _autoReleaseOnFullApproval,
+            mediatorOverrideEnabled: _mediatorOverrideEnabled,
+            externalVerifierEnabled: _externalVerifierEnabled,
+            externalVerifier: _externalVerifier
+        }));
+
+        emit RuleSetUpdated(_ruleSetId);
+    }
+
     function setDefaultRuleSet(uint256 _ruleSetId) external onlyOwner {
-        if (ruleSets[_ruleSetId].requireBuyerApproval == false &&
-            ruleSets[_ruleSetId].requireSellerApproval == false) {
+        if (!ruleSetExists[_ruleSetId]) {
             revert InvalidRuleSet();
         }
         defaultRuleSetId = _ruleSetId;
@@ -138,4 +173,20 @@ contract RulesEngineV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     uint256[50] private __gap;
+
+    function _writeRuleSet(uint256 _ruleSetId, RuleSetInput memory input) internal {
+        if (input.externalVerifierEnabled && input.externalVerifier == address(0)) {
+            revert InvalidVerifier();
+        }
+        ruleSets[_ruleSetId] = RuleSet({
+            requireBuyerApproval: input.requireBuyerApproval,
+            requireSellerApproval: input.requireSellerApproval,
+            autoRefundAfterDeadline: input.autoRefundAfterDeadline,
+            autoReleaseOnFullApproval: input.autoReleaseOnFullApproval,
+            mediatorOverrideEnabled: input.mediatorOverrideEnabled,
+            externalVerifierEnabled: input.externalVerifierEnabled,
+            externalVerifier: input.externalVerifier
+        });
+        ruleSetExists[_ruleSetId] = true;
+    }
 }
