@@ -109,6 +109,84 @@ contract RulesEngineV1Test is Test {
         rulesEngine.setDefaultRuleSet(ruleSetId);
     }
 
+    function testUpdateRuleSet() public {
+        vm.prank(owner);
+        uint256 ruleSetId = rulesEngine.createRuleSet(
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            address(0)
+        );
+
+        vm.expectEmit(true, false, false, false);
+        emit RuleSetUpdated(ruleSetId);
+
+        vm.prank(owner);
+        rulesEngine.updateRuleSet(
+            ruleSetId,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            address(verifier)
+        );
+
+        RulesEngineV1.RuleSet memory ruleSet = rulesEngine.getRuleSet(ruleSetId);
+        assertFalse(ruleSet.requireBuyerApproval);
+        assertTrue(ruleSet.requireSellerApproval);
+        assertTrue(ruleSet.autoRefundAfterDeadline);
+        assertTrue(ruleSet.autoReleaseOnFullApproval);
+        assertTrue(ruleSet.mediatorOverrideEnabled);
+        assertTrue(ruleSet.externalVerifierEnabled);
+        assertEq(ruleSet.externalVerifier, address(verifier));
+    }
+
+    function testUpdateRuleSetRequiresExisting() public {
+        vm.prank(owner);
+        vm.expectRevert(RulesEngineV1.InvalidRuleSet.selector);
+        rulesEngine.updateRuleSet(
+            123,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            address(0)
+        );
+    }
+
+    function testUpdateRuleSetOnlyOwner() public {
+        vm.prank(owner);
+        uint256 ruleSetId = rulesEngine.createRuleSet(
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            address(0)
+        );
+
+        vm.prank(address(99));
+        vm.expectRevert();
+        rulesEngine.updateRuleSet(
+            ruleSetId,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            address(0)
+        );
+    }
+
     function testCanReleaseWithBuyerApproval() public {
         vm.prank(owner);
         uint256 ruleSetId = rulesEngine.createRuleSet(

@@ -4,58 +4,40 @@ pragma solidity ^0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {ExecutorV1} from "../src/escrow/ExecutorV1.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {ISafeBaseEscrow} from "../src/escrow/ExecutorV1.sol";
 
 contract MockEscrow {
-    struct EscrowData {
-        address buyer;
-        address seller;
-        address mediator;
-        address token;
-        uint256 amount;
-        uint256 deadline;
-        uint8 state;
-        bool buyerApproved;
-        bool sellerApproved;
-        bytes32 paymentId;
-        uint256 createdAt;
-    }
-
-    EscrowData public escrowData;
+    ISafeBaseEscrow.EscrowData public escrowData;
+    bool public releasedCalled;
+    bool public refundedCalled;
 
     function setEscrow(
         address buyer,
         uint256 deadline,
         uint8 state,
         bool buyerApproved,
-        bool sellerApproved
+        bool sellerApproved,
+        uint256 ruleSetId
     ) external {
         escrowData.buyer = buyer;
         escrowData.deadline = deadline;
         escrowData.state = state;
         escrowData.buyerApproved = buyerApproved;
         escrowData.sellerApproved = sellerApproved;
+        escrowData.ruleSetId = ruleSetId;
     }
 
-    function getEscrow(uint256) external view returns (
-        address, address, address, address, uint256, uint256, uint8, bool, bool, bytes32, uint256
-    ) {
-        return (
-            escrowData.buyer,
-            escrowData.seller,
-            escrowData.mediator,
-            escrowData.token,
-            escrowData.amount,
-            escrowData.deadline,
-            escrowData.state,
-            escrowData.buyerApproved,
-            escrowData.sellerApproved,
-            escrowData.paymentId,
-            escrowData.createdAt
-        );
+    function getEscrow(uint256) external view returns (ISafeBaseEscrow.EscrowData memory) {
+        return escrowData;
     }
 
-    function refundToBuyer(uint256) external {}
-    function releaseToSeller(uint256) external {}
+    function refundToBuyer(uint256) external {
+        refundedCalled = true;
+    }
+
+    function releaseToSeller(uint256) external {
+        releasedCalled = true;
+    }
 }
 
 contract MockRulesEngine {
@@ -172,14 +154,14 @@ contract ExecutorV1Test is Test {
         vm.prank(owner);
         executor.addAutomator(automator);
 
-        escrowContract.setEscrow(address(3), block.timestamp - 1, 1, false, false);
+        escrowContract.setEscrow(address(3), block.timestamp - 1, 1, false, false, 1);
         rulesEngine.setCanRelease(true);
 
         vm.expectEmit(true, false, false, false);
         emit AutoRefundExecuted(1);
 
         vm.prank(automator);
-        executor.executeAutoRefund(1, 1);
+        executor.executeAutoRefund(1);
 
         assertFalse(executor.scheduledForRefund(1));
     }
@@ -188,26 +170,26 @@ contract ExecutorV1Test is Test {
         vm.prank(owner);
         executor.addAutomator(automator);
 
-        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, false, false);
+        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, false, false, 1);
         rulesEngine.setCanRelease(false);
 
         vm.prank(automator);
         vm.expectRevert(ExecutorV1.DeadlineNotReached.selector);
-        executor.executeAutoRefund(1, 1);
+        executor.executeAutoRefund(1);
     }
 
     function testExecuteAutoRelease() public {
         vm.prank(owner);
         executor.addAutomator(automator);
 
-        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, true, true);
+        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, true, true, 1);
         rulesEngine.setCanRelease(true);
 
         vm.expectEmit(true, false, false, false);
         emit AutoReleaseExecuted(1);
 
         vm.prank(automator);
-        executor.executeAutoRelease(1, 1);
+        executor.executeAutoRelease(1);
 
         assertFalse(executor.scheduledForRelease(1));
     }
@@ -216,14 +198,32 @@ contract ExecutorV1Test is Test {
         vm.prank(owner);
         executor.addAutomator(automator);
 
-        escrowContract.setEscrow(address(3), block.timestamp - 1, 1, false, false);
+        escrowContract.setEscrow(address(3), block.timestamp - 1, 1, false, false, 1);
         rulesEngine.setCanRelease(true);
 
         uint256[] memory escrowIds = new uint256[](1);
         escrowIds[0] = 1;
 
         vm.prank(automator);
-        executor.checkAndExecuteDeadlines(escrowIds, 1);
+        executor.checkAndExecuteDeadlines(escrowIds);
+
+        assertTrue(escrowContract.refundedCalled());
+    }
+
+    function testCheckAndExecuteReleases() public {
+        vm.prank(owner);
+        executor.addAutomator(automator);
+
+        escrowContract.setEscrow(address(3), block.timestamp + 1 days, 1, true, true, 1);
+        rulesEngine.setCanRelease(true);
+
+        uint256[] memory escrowIds = new uint256[](1);
+        escrowIds[0] = 1;
+
+        vm.prank(automator);
+        executor.checkAndExecuteReleases(escrowIds);
+
+        assertTrue(escrowContract.releasedCalled());
     }
 
     function testOnlyAutomatorModifier() public {

@@ -24,20 +24,20 @@
       "implementation": "0x546bD44cE5576A6e90cC7150aD93aAD1B06291BE"
     },
     "RulesEngine": {
-      "proxy": "0x7bFA481f050AC09d676A7Ba61397b3f4dac6E558",
-      "implementation": "0xB49e7b4cCB76B3aE9439798eb980434CBCF8c428"
+      "proxy": "0x02267434995220548CCc3171263229a2aa54e1a4",
+      "implementation": "0xF2a7fbffD5760721C99104A7C1f500797F3D1314"
     },
     "Registry": {
       "proxy": "0x273930106653461A2F4f33Ea2821652283dcAE11",
       "implementation": "0xC1E06BfBBe9b812BFc5feFBe4efDFb7B9A4E64cB"
     },
     "SafeBaseEscrow": {
-      "proxy": "0x1B079e9519CF110b491a231d7AA67c9a597F13B2",
-      "implementation": "0xA1e13a0E7E54bC71ee4173D74773b455A86816aB"
+      "proxy": "0xec0c6F43b9064cE1C33E9343671c0e67cB19594c",
+      "implementation": "0x9e2B522F357711CF4Cd24D781ED2a553E08cCC59"
     },
     "Executor": {
       "proxy": "0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94",
-      "implementation": "0xD7fd8D4026123B1c4135cbF6ba91b7A0b3a5C748"
+      "implementation": "0xBb744584644c5956353bC8E382EC8E1dAA4286BF"
     }
   }
 }

@@ -72,9 +72,9 @@ forge script script/DeployAndInteract.s.sol \
 | Verifier | `0x1B079e9519CF110b491a231d7AA67c9a597F13B2` | ✅ |
 | PaymentTracker | `0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94` | ✅ |
 | BasePay | `0x062d3a45862a32BF5D1e35404aaA55e7027c4F4B` | ✅ |
-| RulesEngine | `0xDb1855c6C8ADd51eE4B7e132173cA9833B1DAf07` | ✅ |
+| RulesEngine | `0xFA194dd94Fb7E8253fb6717eF4C6C23D4b2Cc7A2` | ✅ |
 | Registry | `0x57741EE5bAc991D43Cf71207781fCB0eE4b9e9a8` | ✅ |
-| SafeBaseEscrow | `0xA1e13a0E7E54bC71ee4173D74773b455A86816aB` | ✅ |
+| SafeBaseEscrow | `0x2a441dD6a9B81013D49C1d553e8c42Cb32679652` | ✅ |
 | Executor | `0xB49e7b4cCB76B3aE9439798eb980434CBCF8c428` | ✅ |
 
 ### Base Mainnet
@@ -86,10 +86,10 @@ forge script script/DeployAndInteract.s.sol \
 | Verifier | `0xb06d4414B479eb425f6E7d38226d0194C595c7CF` | ✅ |
 | PaymentTracker | `0xAA1be2099208db011dFbEa7174114D69982cFcef` | ✅ |
 | BasePay | `0xD47991043dA73bdfcF6c399e5Ed26e5C8D6c3D27` | ✅ |
-| RulesEngine | `0x7bFA481f050AC09d676A7Ba61397b3f4dac6E558` | ✅ |
+| RulesEngine | `0x02267434995220548CCc3171263229a2aa54e1a4` | ✅ |
 | Registry | `0x273930106653461A2F4f33Ea2821652283dcAE11` | ✅ |
-| SafeBaseEscrow | `0x1B079e9519CF110b491a231d7AA67c9a597F13B2` | ✅ |
-| Executor | `0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94` | ✅ |
+| SafeBaseEscrow | `0xec0c6F43b9064cE1C33E9343671c0e67cB19594c` | ✅ |
+| Executor | `0xdBa335d18751944b46f205F32F03Fa4F1BEf1a94` | ✅ | Impl: `0xBb744584644c5956353bC8E382EC8E1dAA4286BF` |
 
 **Network Details:**
 - **Base Sepolia RPC**: `https://sepolia.base.org`
