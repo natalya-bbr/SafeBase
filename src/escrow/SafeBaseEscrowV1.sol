@@ -37,6 +37,23 @@ interface IRulesEngine {
     ) external view returns (bool);
 }
 
+interface IRulesEngine {
+    function canRelease(
+        uint256 ruleSetId,
+        bool buyerApproved,
+        bool sellerApproved,
+        bool isMediatorOverride,
+        uint256 escrowId,
+        bytes calldata verifierData
+    ) external view returns (bool);
+
+    function canRefund(
+        uint256 ruleSetId,
+        uint256 deadline,
+        bool isMediatorOverride
+    ) external view returns (bool);
+}
+
 contract SafeBaseEscrowV1 is
     Initializable,
     UUPSUpgradeable,
