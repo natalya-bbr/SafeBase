@@ -154,7 +154,7 @@ contract ExecutorV1Test is Test {
         emit AutoRefundExecuted(1);
 
         vm.prank(automator);
-        executor.executeAutoRefund(1, 1);
+        executor.executeAutoRefund(1);
 
         assertFalse(executor.scheduledForRefund(1));
     }
@@ -168,7 +168,7 @@ contract ExecutorV1Test is Test {
 
         vm.prank(automator);
         vm.expectRevert(ExecutorV1.DeadlineNotReached.selector);
-        executor.executeAutoRefund(1, 1);
+        executor.executeAutoRefund(1);
     }
 
     function testExecuteAutoRelease() public {
@@ -182,7 +182,7 @@ contract ExecutorV1Test is Test {
         emit AutoReleaseExecuted(1);
 
         vm.prank(automator);
-        executor.executeAutoRelease(1, 1);
+        executor.executeAutoRelease(1);
 
         assertFalse(executor.scheduledForRelease(1));
     }
