@@ -7,21 +7,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 import {ISafeBaseEscrow} from "../src/escrow/ExecutorV1.sol";
 
 contract MockEscrow {
-    struct EscrowData {
-        address buyer;
-        address seller;
-        address mediator;
-        address token;
-        uint256 amount;
-        uint256 deadline;
-        uint8 state;
-        bool buyerApproved;
-        bool sellerApproved;
-        bytes32 paymentId;
-        uint256 createdAt;
-    }
-
-    EscrowData public escrowData;
+    ISafeBaseEscrow.EscrowData public escrowData;
 
     function setEscrow(
         address buyer,
