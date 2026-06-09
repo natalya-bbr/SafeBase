@@ -155,8 +155,9 @@ contract SafeBaseEscrowV1 is
 
         emit EscrowCreated(escrowId, msg.sender, _seller, _token, _amount, _deadline);
 
-        if (registry != address(0)) {
-            IRegistry(registry).indexEscrow(escrowId, msg.sender, _seller, _amount, block.timestamp);
+        address registry_ = registry;
+        if (registry_ != address(0)) {
+            IRegistry(registry_).indexEscrow(escrowId, msg.sender, _seller, _amount, block.timestamp);
         }
 
         return escrowId;
@@ -369,8 +370,9 @@ contract SafeBaseEscrowV1 is
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function _updateRegistryState(uint256 _escrowId) internal {
-        if (registry != address(0)) {
-            IRegistry(registry).updateEscrowState(_escrowId, uint8(escrows[_escrowId].state));
+        address registry_ = registry;
+        if (registry_ != address(0)) {
+            IRegistry(registry_).updateEscrowState(_escrowId, uint8(escrows[_escrowId].state));
         }
     }
 
