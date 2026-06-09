@@ -152,7 +152,8 @@ contract Treasury is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             (bool success,) = request.to.call{value: request.amount}("");
             if (!success) revert TransferFailed();
         } else {
-            IERC20(request.token).transfer(request.to, request.amount);
+            bool success = IERC20(request.token).transfer(request.to, request.amount);
+            if (!success) revert TransferFailed();
         }
 
         emit WithdrawalExecuted(requestId);
